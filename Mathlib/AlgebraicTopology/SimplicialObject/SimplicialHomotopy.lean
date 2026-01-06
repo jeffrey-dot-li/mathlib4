@@ -43,16 +43,21 @@ namespace CategoryTheory.SimplicialObject
 
 variable {C : Type u} [Category.{v} C]
 
+-- Note: Compared to #32881 the roles of `f` and `g` have been swapped
 /-- A simplicial homotopy between morphisms `f g : X ⟶ Y` of simplicial objects
 consists of a family of morphisms `h n i : X _⦋n⦌ ⟶ Y _⦋n+1⦌` for `i : Fin (n + 1)`,
 satisfying compatibility conditions with respect to face and degeneracy maps -/
 @[ext]
 structure Homotopy
     {X Y : SimplicialObject C} (f g : X ⟶ Y) where
-  /-- Basic data: `h i : Xₙ ⟶ Yₙ₊₁` for `i : Fin (n + 1)`. -/
-  h {n : ℕ} (i : Fin (n + 1)) : X _⦋n⦌ ⟶ Y _⦋n+1⦌
+  /-- Basic data: `h i : Xₙ ⟶ Yₙ₊₁` for `i = 0..n`. -/
+  h {n : ℕ} (i : Fin (n + 1)) : (X _⦋n⦌ ⟶ Y _⦋n+1⦌)
+  /-- Endpoint `d₀ h₀ = g`. -/
   h_zero_comp_δ_zero (n : ℕ) : h 0 ≫ Y.δ 0 = g.app (op ⦋n⦌)
+  /-- Endpoint `d_{n+1} hₙ = f`. -/
   h_last_comp_δ_last (n : ℕ) : h (Fin.last n) ≫ Y.δ (Fin.last (n + 1)) = f.app (op ⦋n⦌)
+  /- nlab: `dᵢ hⱼ = h_{j'-1} dᵢ` if i < j', let j' = j + 1 -/
+  /-- `dᵢ h_{j+1} = hⱼ dᵢ` if i < j + 1. -/
   h_succ_comp_δ_castSucc_of_lt {n : ℕ} (i : Fin (n + 2)) (j : Fin (n + 1)) (hij : i ≤ j.castSucc) :
     h j.succ ≫ Y.δ i.castSucc = X.δ i ≫ h j
   h_succ_comp_δ_castSucc_succ {n : ℕ} (j : Fin (n + 1)) :
