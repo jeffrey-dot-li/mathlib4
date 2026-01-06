@@ -92,6 +92,7 @@ noncomputable def h {n : ℕ} (i : Fin (n + 1)) (x : X _⦋n⦌) : Y _⦋n + 1�
 
 end toSimplicialHomotopy
 
+#check SSet.yonedaEquiv
 open toSimplicialHomotopy in
 noncomputable def toSimplicialHomotopy (H : Homotopy f g) :
     SimplicialObject.Homotopy f g where
@@ -101,11 +102,10 @@ noncomputable def toSimplicialHomotopy (H : Homotopy f g) :
     simp only [types_comp_apply, h, ← SSet.δ_naturality_apply, ← H.h₁]
     dsimp
     apply congr_arg
-    ext i : 2
+    ext k : 2
     · have := SimplexCategory.δ_comp_σ_self (i := (0 : Fin (n + 1)))
       dsimp at this ⊢
-      rw [stdSimplex.δ_objEquiv_symm_apply, this,
-        stdSimplex.yonedaEquiv_symm_app_objEquiv_symm,
+      rw [stdSimplex.δ_objEquiv_symm_apply, this, stdSimplex.yonedaEquiv_symm_app_objEquiv_symm,
         op_id, FunctorToTypes.map_id_apply]
     · rw [stdSimplex.δ_objMk₁_of_lt _ _ (by tauto)]
       rfl
@@ -114,13 +114,51 @@ noncomputable def toSimplicialHomotopy (H : Homotopy f g) :
     simp only [types_comp_apply, h, ← SSet.δ_naturality_apply, ← H.h₀]
     dsimp
     apply congr_arg
-    ext i
-    · simp
-      sorry
-    · simp
-      sorry
-  h_succ_comp_δ_castSucc_of_lt := sorry
-  h_succ_comp_δ_castSucc_succ := sorry
+    ext k
+    · dsimp
+      have := SimplexCategory.δ_comp_σ_succ (i := Fin.last n)
+      dsimp at this
+      rw [stdSimplex.δ_objEquiv_symm_apply, this, stdSimplex.yonedaEquiv_symm_app_objEquiv_symm,
+        op_id, FunctorToTypes.map_id_apply]
+    · change _ = 0
+      rw [stdSimplex.δ_objMk₁_of_le _ _ (by simp)]
+      simp [stdSimplex.objMk₁_apply_eq_zero_iff]
+  h_succ_comp_δ_castSucc_of_lt {n} i j hij := by
+    ext x
+    simp only [types_comp_apply, h, ← SSet.δ_naturality_apply]
+    dsimp
+    apply congr_arg
+    ext k : 2
+    · dsimp
+      rw [stdSimplex.δ_objEquiv_symm_apply,
+        stdSimplex.yonedaEquiv_symm_app_objEquiv_symm,
+        stdSimplex.yonedaEquiv_symm_app_objEquiv_symm]
+      erw [← FunctorToTypes.map_comp_apply]
+      rw [← op_comp]
+      apply congr_fun
+      congr 2
+      exact SimplexCategory.δ_comp_σ_of_le hij
+    · dsimp
+      rw [stdSimplex.δ_objMk₁_of_lt, Fin.pred_succ]
+      rw [Fin.castSucc_lt_succ_iff, ← Fin.castSucc_succ]
+      simp only [Fin.castSucc_le_castSucc_iff]
+      exact hij.trans (j.castSucc_le_succ)
+  h_succ_comp_δ_castSucc_succ {n} i := by
+    ext x
+    simp only [types_comp_apply, h, ← SSet.δ_naturality_apply]
+    dsimp
+    apply congr_arg
+    ext k : 2
+    · dsimp
+      rw [stdSimplex.δ_objEquiv_symm_apply, stdSimplex.yonedaEquiv_symm_app_objEquiv_symm,
+        stdSimplex.δ_objEquiv_symm_apply, stdSimplex.yonedaEquiv_symm_app_objEquiv_symm]
+      apply congr_fun
+      congr 2
+      rw [SimplexCategory.δ_comp_σ_succ (i := i.castSucc), ← Fin.castSucc_succ,
+        SimplexCategory.δ_comp_σ_self (i := i.succ)]
+    · dsimp
+      rw [stdSimplex.δ_objMk₁_of_lt _ _ (by simp), stdSimplex.δ_objMk₁_of_le _ _ (by simp)]
+      aesop
   h_castSucc_comp_δ_succ_of_lt := sorry
   h_comp_σ_castSucc_of_le := sorry
   h_comp_σ_succ_of_lt := sorry
